@@ -111,7 +111,7 @@ function getStream() {
   return navigator.mediaDevices
     .getUserMedia(constraints)
     .then(gotStream)
-    .catch(handleError);
+    // .catch(handleError);
 }
 
 function gotStream(stream) {
