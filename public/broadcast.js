@@ -22,7 +22,12 @@ socket.on("watcher", id => {
   const peerConnection = new RTCPeerConnection(config);
   peerConnections[id] = peerConnection;
 
-  let stream = videoElement.srcObject;
+  // let stream = videoElement.srcObject;
+  // console.log("WATCHER")
+  // console.log(videoSelect.value)
+  // console.log(stream)
+
+  let stream = canvas.captureStream();
   stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
 
   peerConnection.onicecandidate = event => {
@@ -56,19 +61,19 @@ window.onunload = window.onbeforeunload = () => {
 const videoElement = document.querySelector("video");
 const audioSelect = document.querySelector("select#audioSource");
 const videoSelect = document.querySelector("select#videoSource");
+let canvas = document.querySelector("#three-canvas");
 
-audioSelect.onchange = getStream;
-videoSelect.onchange = getStream;
 
-getStream()
-  .then(getDevices)
-  .then(gotDevices);
+
+
 
 function getDevices() {
+  console.log("getDevices")
   return navigator.mediaDevices.enumerateDevices();
 }
 
 function gotDevices(deviceInfos) {
+  console.log("gotDevices")
   window.deviceInfos = deviceInfos;
   for (const deviceInfo of deviceInfos) {
     const option = document.createElement("option");
@@ -84,6 +89,7 @@ function gotDevices(deviceInfos) {
 }
 
 function getStream() {
+  console.log("getStream")
   if (window.stream) {
     window.stream.getTracks().forEach(track => {
       track.stop();
@@ -91,10 +97,17 @@ function getStream() {
   }
   const audioSource = audioSelect.value;
   const videoSource = videoSelect.value;
+  console.log(videoSource)
+  // const constraints = {
+  //   audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
+  //   video: { deviceId: videoSource ? { exact: videoSource } : undefined }
+  // };
+
   const constraints = {
-    audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
-    video: { deviceId: videoSource ? { exact: videoSource } : undefined }
+    audio: true, video: true 
   };
+
+  console.log(constraints)
   return navigator.mediaDevices
     .getUserMedia(constraints)
     .then(gotStream)
@@ -102,6 +115,8 @@ function getStream() {
 }
 
 function gotStream(stream) {
+  console.log("gotStream")
+  console.log(stream)
   window.stream = stream;
   audioSelect.selectedIndex = [...audioSelect.options].findIndex(
     option => option.text === stream.getAudioTracks()[0].label
@@ -110,9 +125,68 @@ function gotStream(stream) {
     option => option.text === stream.getVideoTracks()[0].label
   );
   videoElement.srcObject = stream;
+  console.log(videoSelect.value)
   socket.emit("broadcaster");
 }
 
 function handleError(error) {
   console.error("Error: ", error);
 }
+
+function initThreeJsSquare() {
+  var scene = new THREE.Scene();
+  var width = 300
+  var height = 300
+  var camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+
+  var renderer = new THREE.WebGLRenderer({
+      preserveDrawingBuffer :true
+  });
+  renderer.setSize(width,height);
+  renderer.domElement.id="three-canvas"
+  document.getElementById("three-square").appendChild( renderer.domElement );
+  // $("#three-square").html(renderer.domElement)
+  // document.body.appendChild(renderer.domElement);
+
+  var geometry = new THREE.BoxGeometry(1, 1, 1);
+  var material = new THREE.MeshBasicMaterial({
+      color: 0x00ff00
+  });
+  var cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+
+  camera.position.z = 5;
+
+  var animate = function () {
+      requestAnimationFrame(animate);
+
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+
+      renderer.render(scene, camera);
+  };
+
+  animate();
+  initOther()
+}
+
+function initOther(){
+
+  audioSelect.onchange = getStream;
+  videoSelect.onchange = getStream;
+  
+  getStream()
+    .then(getDevices)
+    .then(gotDevices);
+
+    canvas = document.querySelector("#three-canvas");
+    console.log("CANVAS ELEMENT")
+    console.log(canvas)
+}
+
+window.addEventListener("load", function() {
+
+  initThreeJsSquare()
+  
+
+})
