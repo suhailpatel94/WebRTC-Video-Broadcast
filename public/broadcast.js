@@ -108,10 +108,11 @@ function getStream() {
   };
 
   console.log(constraints)
+  return canvas.captureStream();
   return navigator.mediaDevices
     .getUserMedia(constraints)
     .then(gotStream)
-    // .catch(handleError);
+    .catch(handleError);
 }
 
 function gotStream(stream) {
@@ -175,13 +176,14 @@ function initOther(){
   audioSelect.onchange = getStream;
   videoSelect.onchange = getStream;
   
-  getStream()
-    .then(getDevices)
-    .then(gotDevices);
+
 
     canvas = document.querySelector("#three-canvas");
     console.log("CANVAS ELEMENT")
     console.log(canvas)
+    getStream()
+    .then(getDevices)
+    .then(gotDevices);
 }
 
 window.addEventListener("load", function() {
