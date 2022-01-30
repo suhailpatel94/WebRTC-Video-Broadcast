@@ -16,6 +16,7 @@ const socket = io.connect(window.location.origin);
 const video = document.querySelector("video");
 const enableAudioButton = document.querySelector("#enable-audio");
 
+let streamsArr = []
 enableAudioButton.addEventListener("click", enableAudio)
 
 socket.on("offer", (id, description) => {
@@ -28,6 +29,7 @@ socket.on("offer", (id, description) => {
       socket.emit("answer", id, peerConnection.localDescription);
     });
   peerConnection.ontrack = event => {
+    streamsArr.push(event.streams[0])
     video.srcObject = event.streams[0];
   };
   peerConnection.onicecandidate = event => {
@@ -60,4 +62,9 @@ window.onunload = window.onbeforeunload = () => {
 function enableAudio() {
   console.log("Enabling audio")
   video.muted = false;
+}
+
+function changeStream(index){
+  console.log(streamsArr)
+  video.srcObject = streamsArr[index];
 }
