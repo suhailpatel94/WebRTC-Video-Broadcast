@@ -28,6 +28,7 @@ socket.on("offer", (id, description) => {
     .then(() => {
       socket.emit("answer", id, peerConnection.localDescription);
     });
+    streamsArr = []
   peerConnection.ontrack = event => {
     streamsArr.push(event.streams[0])
     video.srcObject = event.streams[0];
