@@ -14,10 +14,9 @@ const config = {
 
 const socket = io.connect(window.location.origin);
 const video = document.querySelector("video");
-const enableAudioButton = document.querySelector("#enable-audio");
 
 let streamsArr = []
-enableAudioButton.addEventListener("click", enableAudio)
+
 
 socket.on("offer", (id, description) => {
   peerConnection = new RTCPeerConnection(config);
@@ -60,10 +59,6 @@ window.onunload = window.onbeforeunload = () => {
   peerConnection.close();
 };
 
-function enableAudio() {
-  console.log("Enabling audio")
-  video.muted = false;
-}
 
 function changeStream(index){
   console.log(streamsArr)
